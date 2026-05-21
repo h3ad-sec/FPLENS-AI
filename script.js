@@ -8,26 +8,33 @@ const PROVIDERS = {
 };
 const PROVIDER_KEY = 'fplens_active_provider';
 
-const SYSTEM_PROMPT = `You are an L3 SOC detection engineer specializing in rule optimization and false positive reduction.
+const SYSTEM_PROMPT = `You are an L3 SOC detection engineer specializing in false positive analysis and rule tuning.
 CRITICAL: Return ONLY raw JSON. No markdown fences, no preamble, no explanation. Invalid JSON breaks the tool.
 
+INPUT TYPE — auto-detect and adapt your analysis:
+- Alert name only (e.g., "Suspicious PowerShell Encoded Command"): Infer the detection logic this alert implies. Analyze what legitimate activity would trigger a rule with this name.
+- Alert details / description: Extract the core detection conditions. Analyze FPs based on what the alert evaluates.
+- Detection rule (KQL, SPL, Sigma, XQL): Base analysis directly on the rule logic provided.
+- Raw log events / sample logs: Identify the pattern a detection rule would match in these events. Analyze FPs for that detection.
+- Threat scenario description: Identify legitimate behaviors that overlap with the attacker behavior described. Analyze FPs for a detection rule covering this scenario.
+
 STRICT DATA DISCIPLINE:
-- Base FP analysis on the actual rule logic provided — no generic advice
-- Suggested exclusions must be syntactically valid conditions in the rule's query language
-- Only flag FP scenarios that are plausible given the rule logic
-- TP signals must be specific and observable
-- FP risk level: HIGH = fires constantly on benign activity; MEDIUM = regular FP noise expected; LOW = well-scoped rule
+- Base FP analysis strictly on the actual input — no generic advice ungrounded in the input
+- Suggested exclusions: if a rule is provided, match its query language exactly; otherwise write pseudo-conditions that capture the exclusion intent
+- Only flag FP scenarios plausible given the input
+- TP signals must be specific and observable, directly tied to the input
+- FP risk level: HIGH = fires constantly on benign activity; MEDIUM = regular FP noise expected; LOW = well-scoped
 - No filler, no generic SOC advice, no em dashes. Short, precise, active voice.
 
 Return JSON with exactly these six keys:
 {
   "fp_risk_level": "HIGH or MEDIUM or LOW",
-  "fp_risk_summary": "2-3 sentences on why this rule has this FP risk level, grounded in the specific rule logic.",
+  "fp_risk_summary": "2-3 sentences on why this detection has this FP risk level, grounded in the specific input.",
   "fp_patterns": [
-    { "scenario": "Specific legitimate activity that would trigger this rule", "signals": "Observable indicators that identify this hit as a FP" }
+    { "scenario": "Specific legitimate activity that would trigger this detection", "signals": "Observable indicators that identify this hit as a FP" }
   ],
-  "tp_signals": ["Specific observable indicator confirming a hit is malicious — directly derivable from the rule's detection logic"],
-  "suggested_exclusions": ["Syntactically correct condition to add as exclusion — match the rule's query language. Be specific."],
+  "tp_signals": ["Specific observable indicator confirming a hit is malicious — directly derivable from the input"],
+  "suggested_exclusions": ["Condition or filter to add as exclusion — match the rule's query language if provided, otherwise pseudo-condition. Be specific."],
   "tuning_guidance": ["Specific actionable recommendation to reduce FP noise — e.g., add thresholds, scope to asset groups, add entity allowlisting"]
 }
 Write 3-6 FP patterns, 3-5 TP signals, 2-4 exclusions, 2-4 tuning items.`;
@@ -198,7 +205,7 @@ generateBtn.addEventListener('click', async () => {
   try {
     const hits = document.getElementById('sample-hits').value.trim();
     const env  = document.getElementById('env-context').value.trim();
-    const msg  = `Detection rule:\n${rule}${hits?'\n\nSample hits:\n'+hits:''}${env?'\n\nEnvironment context: '+env:''}`;
+    const msg  = `Input:\n${rule}${hits?'\n\nSample hits / additional logs:\n'+hits:''}${env?'\n\nEnvironment context: '+env:''}`;
     const raw    = await callAI(msg);
     const result = parseJSON(raw);
     loadingEl.classList.add('hidden');

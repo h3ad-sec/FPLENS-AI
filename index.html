@@ -203,14 +203,14 @@
   <main>
     <div class="input-card">
       <div class="input-group">
-        <label for="rule-input">Detection Rule <span class="required">*</span></label>
+        <label for="rule-input">Alert, Rule, Log, or Threat Scenario <span class="required">*</span></label>
         <textarea id="rule-input" rows="8"
-          placeholder="Paste your detection rule — KQL, SPL, Sigma, or XQL. Include the full rule logic."></textarea>
+          placeholder="Paste any of: alert name, alert details, detection rule (KQL/SPL/Sigma/XQL), raw log events, or a threat scenario description. FPLENS-AI will auto-detect the input type and analyze false positive risk."></textarea>
       </div>
       <div class="input-group">
-        <label for="sample-hits">Sample Hits <span class="optional">optional — paste log lines that triggered this rule</span></label>
+        <label for="sample-hits">Sample Hits / Additional Logs <span class="optional">optional</span></label>
         <textarea id="sample-hits" rows="4"
-          placeholder="Paste sample alert hits or log events that triggered this rule — helps identify specific FP patterns..."></textarea>
+          placeholder="Paste sample alert hits or additional log events — helps identify more specific FP patterns..."></textarea>
       </div>
       <div class="input-group">
         <label for="env-context">Environment Context <span class="optional">optional</span></label>
@@ -219,7 +219,7 @@
         <span class="data-notice">Content is sent to <span id="notice-provider">your selected AI provider</span> only — never stored by this tool.</span>
       </div>
       <div class="input-actions">
-        <button id="generate-btn" class="btn-primary" disabled>Analyze Rule</button>
+        <button id="generate-btn" class="btn-primary" disabled>Analyze</button>
         <button id="clear-btn" class="btn-ghost">Clear</button>
         <span id="active-provider-badge" class="provider-badge"></span>
       </div>
@@ -232,7 +232,7 @@
 
     <div id="loading-state" class="hidden loading-state">
       <div class="spinner"></div>
-      <span>Analyzing rule for false positive risk...</span>
+      <span>Analyzing for false positive scenarios...</span>
     </div>
 
     <div id="output-section" class="hidden">
